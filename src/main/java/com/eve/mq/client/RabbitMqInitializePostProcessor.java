@@ -3,6 +3,8 @@ package com.eve.mq.client;
 import com.eve.common.PropertiesInfo;
 import com.eve.mq.client.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -28,6 +30,8 @@ import java.util.List;
  */
 @Component
 public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered {
+
+    protected final Logger logger = LoggerFactory.getLogger(RabbitMqInitializePostProcessor.class);
 
     private ConfigurableListableBeanFactory beanFactory;
 
@@ -76,6 +80,7 @@ public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPo
 
         String containerFactoryName = annotation.containerFactory();
         String templateName = containerFactoryName + "_template";
+        logger.info("rabbit mq containerFactory beanName:[{}] template beanName:[{}[]", containerFactoryName, templateName);
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         containerFactory.setPrefetchCount(properties.getPrefetchCount());
         containerFactory.setConcurrentConsumers(properties.getConcurrency());
