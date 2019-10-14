@@ -1,6 +1,5 @@
-package com.eve.mq.client;
+package com.eve;
 
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -18,13 +17,13 @@ public class MqListener {
 
     @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
     @RabbitHandler
-    public void listenerShoppeMq(Message message){
-        System.out.println("==============");
+    public void listenerShoppeMq(User message) {
+        System.out.println("==============" + message.getName());
     }
 
-    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
-    @RabbitHandler
-    public void listenerShoppeMq2(Message message){
-        System.out.println("========222222======");
-    }
+//    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
+//    @RabbitHandler
+//    public void listenerShoppeMq2(Message message){
+//        System.out.println("========222222======");
+//    }
 }

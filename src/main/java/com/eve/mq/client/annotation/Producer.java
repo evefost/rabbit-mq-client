@@ -15,6 +15,12 @@ import java.lang.annotation.*;
 @Documented
 public @interface Producer {
 
+    /**
+     * The bean name of the {@link org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory}
+     *
+     * @return
+     */
     String containerFactory() default "";
+
 
 }

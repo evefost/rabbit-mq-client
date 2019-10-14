@@ -1,7 +1,6 @@
-package com.eve.mq.client.config;
+package com.eve.mq.client;
 
 import com.eve.common.PropertiesInfo;
-import com.eve.mq.client.RabbitmqProperties;
 import com.eve.mq.client.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -28,7 +27,7 @@ import java.util.List;
  * @date 2019/10/12
  */
 @Component
-public class RabbitMqInitPostProcessor implements BeanDefinitionRegistryPostProcessor ,  PriorityOrdered {
+public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered {
 
     private ConfigurableListableBeanFactory beanFactory;
 
@@ -65,7 +64,7 @@ public class RabbitMqInitPostProcessor implements BeanDefinitionRegistryPostProc
         RabbitmqProperties properties = propertiesInfo.getProperties();
         Method method = propertiesInfo.getMethod();
         AsRabbitmqProperties annotation = AnnotationUtils.findAnnotation(method, AsRabbitmqProperties.class);
-        String templateName = annotation.templateName();
+
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setAddresses(properties.getAddress());
         connectionFactory.setUsername(properties.getUsername());
@@ -76,6 +75,7 @@ public class RabbitMqInitPostProcessor implements BeanDefinitionRegistryPostProc
         Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
 
         String containerFactoryName = annotation.containerFactory();
+        String templateName = containerFactoryName + "_template";
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         containerFactory.setPrefetchCount(properties.getPrefetchCount());
         containerFactory.setConcurrentConsumers(properties.getConcurrency());

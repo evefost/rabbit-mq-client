@@ -1,5 +1,6 @@
-package com.eve.mq.client;
+package com.eve;
 
+import com.eve.mq.client.RabbitmqProperties;
 import com.eve.mq.client.annotation.AsRabbitmqProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

@@ -1,10 +1,8 @@
-package com.eve.mq.client;
+package com.eve;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * 类说明
@@ -17,18 +15,22 @@ import javax.annotation.Resource;
 @RestController
 public class TestController {
 
-    @Resource(name = "aaa")
-    RabbitTemplate template;
+//    @Resource(name = "aaa")
+//    RabbitTemplate template;
 
-    @Resource(name = "bbb")
-    RabbitTemplate template2;
+//    @Resource(name = "bbb")
+//    RabbitTemplate template2;
+
+    @Autowired
+    private TestProducerApi producerApi;
 
     @GetMapping("/publish")
     String publish(){
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-        template.convertAndSend("xie_test","xie-rout-key",user);
+        //template.convertAndSend("xie_test","xie-rout-key",user);
+        producerApi.sendUser(user);
         return "success";
     }
 
@@ -37,7 +39,7 @@ public class TestController {
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-        template2.convertAndSend("xie_test","xie-rout-key",user);
+        //template2.convertAndSend("xie_test","xie-rout-key",user);
         return "success";
     }
 }
