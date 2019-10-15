@@ -21,14 +21,14 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 public class TestAutoConfiguration {
 
     @ConfigurationProperties(prefix = "rabbitmq")
-    @AsRabbitmqProperties(containerFactory = "container_1",templateName = "aaa")
-    public RabbitmqProperties rabbitmqProperties() {
+    @AsRabbitmqProperties(containerFactory = "container_1")
+    RabbitmqProperties rabbitmqProperties() {
         return new RabbitmqProperties();
     }
 
     @ConfigurationProperties(prefix = "rabbitmq2")
-    @AsRabbitmqProperties(containerFactory = "container_2",templateName = "bbb")
-    public RabbitmqProperties rabbitmqProperties2() {
+    @AsRabbitmqProperties(containerFactory = "container_2")
+    RabbitmqProperties rabbitmqProperties2() {
         return new RabbitmqProperties();
     }
 

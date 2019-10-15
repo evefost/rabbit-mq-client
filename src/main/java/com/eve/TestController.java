@@ -42,4 +42,16 @@ public class TestController {
         //template2.convertAndSend("xie_test","xie-rout-key",user);
         return "success";
     }
+
+//    @Autowired
+//    private MqListener mqListener;
+
+    @GetMapping("/publish3")
+    String publish3() {
+        User user = new User();
+        user.setAge(111);
+        user.setName("xieayng");
+//        mqListener.listenerShoppeMq2(user);
+        return "success";
+    }
 }

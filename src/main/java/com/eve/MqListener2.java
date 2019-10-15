@@ -1,5 +1,6 @@
 package com.eve;
 
+import com.eve.mq.client.annotation.Consumer;
 import com.eve.mq.client.annotation.Tenant;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -12,12 +13,12 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  * @version 1.0.0
  * @date 2019/10/13
  */
-//@Component
-public class MqListener {
+@Consumer
+public class MqListener2 {
 
 
     @Tenant
-    @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
+    @RabbitListener(queues = "xie-queue2", containerFactory = "container_1")
     @RabbitHandler
     public void listenerShoppeMq(User message) {
         System.out.println("==============" + message.getName());

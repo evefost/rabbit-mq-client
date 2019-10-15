@@ -56,15 +56,14 @@ public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPo
     }
 
 
-
     public void createMqClient(List<PropertiesInfo<RabbitmqProperties>> propertiesInfos) {
-        for(PropertiesInfo<RabbitmqProperties> propertiesInfo:propertiesInfos){
+        for (PropertiesInfo<RabbitmqProperties> propertiesInfo : propertiesInfos) {
             regiestRabbitMqClient(propertiesInfo);
         }
 
     }
 
-    private void regiestRabbitMqClient(PropertiesInfo<RabbitmqProperties> propertiesInfo){
+    private void regiestRabbitMqClient(PropertiesInfo<RabbitmqProperties> propertiesInfo) {
         RabbitmqProperties properties = propertiesInfo.getProperties();
         Method method = propertiesInfo.getMethod();
         AsRabbitmqProperties annotation = AnnotationUtils.findAnnotation(method, AsRabbitmqProperties.class);
@@ -89,14 +88,16 @@ public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPo
 
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
-        beanFactory.registerSingleton(templateName,template);
-        beanFactory.registerSingleton(containerFactoryName,containerFactory);
+        beanFactory.registerSingleton(templateName, template);
+        beanFactory.registerSingleton(containerFactoryName, containerFactory);
+        MqAdvice mqAdvice = new MqAdvice();
+        containerFactory.setAdviceChain(mqAdvice);
     }
 
 
     @Override
     public int getOrder() {
-        return HIGHEST_PRECEDENCE+10;
+        return HIGHEST_PRECEDENCE + 10;
     }
 
 }
