@@ -7,6 +7,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.cglib.proxy.Callback;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Field;
@@ -20,7 +21,7 @@ import java.lang.reflect.Method;
  * @version 1.0.0
  * @date 2019/10/15
  */
-public class MqAdvice implements MethodInterceptor {
+public class MqAdvice implements MethodInterceptor{
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         doBefore(invocation);
@@ -34,37 +35,47 @@ public class MqAdvice implements MethodInterceptor {
     private void doBefore(MethodInvocation invocation) throws IllegalAccessException {
         System.out.println("do before ...");
         Method method = invocation.getMethod();
-        Message msg = (Message) invocation.getArguments()[1];
-        MessageProperties messageProperties1 = msg.getMessageProperties();
-        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
+
         Tenant tenantA = AnnotationUtils.findAnnotation(method, Tenant.class);
         if (tenantA != null) {
             Object arg = invocation.getArguments()[0];
             Class<?> messageClass = arg.getClass();
-            Message message = (Message) arg;
-            MessageProperties messageProperties = message.getMessageProperties();
-            Object o = messageConverter.fromMessage(message);
-            Field tenantField = fieldExist(messageClass, "tenant");
-//            tenantField.get(message);
-//            if (argument instanceof Message) {
-//                WrapperData data = (WrapperData) argument;
-//                ServerContextHolder.setTenantId(data.getTenantId());
-//            } else {
-//                throw new RuntimeException("租户信息不存在");
-//            }
+            Field tenantField = fieldExist(messageClass, "tenantId");
+            if(tenantField == null){
+                System.out.printf("11111");
+            }else {
+                System.out.printf("22222");
+            }
         }
     }
 
     private Field fieldExist(Class clzz, String fieldName) {
+        Field field=null;
         try {
-            return clzz.getField(fieldName);
+            field =  clzz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+
         }
-        return null;
+        if(field == null){
+            Class superclass = clzz.getSuperclass();
+            if(superclass == null){
+                return null;
+            }
+            try {
+                field =  superclass.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+
+            }
+        }
+        return field;
     }
 
     private void doAfter(MethodInvocation invocation) {
         ServerContextHolder.setTenantId(null);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

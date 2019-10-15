@@ -43,15 +43,24 @@ public class TestController {
         return "success";
     }
 
-//    @Autowired
-//    private MqListener mqListener;
+    @Autowired
+    private MqListener mqListener;
 
     @GetMapping("/publish3")
     String publish3() {
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-//        mqListener.listenerShoppeMq2(user);
+        mqListener.listenerShoppeMq2(user);
+        return "success";
+    }
+
+    @GetMapping("/publish4")
+    String publish4() {
+        User2 user = new User2();
+        user.setAge(111);
+        user.setName("xieayng");
+        mqListener.listenerShoppeMq(user);
         return "success";
     }
 }

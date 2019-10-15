@@ -13,7 +13,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  * @version 1.0.0
  * @date 2019/10/13
  */
-@Consumer
+//@Consumer
 public class MqListener2 {
 
 

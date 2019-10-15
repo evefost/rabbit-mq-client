@@ -1,27 +1,19 @@
 package com.eve.mq.client;
 
-import com.eve.mq.client.annotation.Consumer;
-import com.eve.mq.client.annotation.Routekey;
-import com.eve.mq.client.support.MethodInfo;
-import com.eve.mq.client.support.ProducerFactoryBean;
-import com.eve.mq.client.support.TopicPointInfo;
-import com.eve.spring.ClassScaner;
+import com.eve.mq.client.annotation.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.*;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -35,140 +27,84 @@ import java.util.*;
  * @date 2019/10/14
  */
 @Component
-public class ConsumerRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor {
+public class ConsumerRegistryPostProcessor implements ResourceLoaderAware, BeanPostProcessor, Ordered {
 
     protected final Logger logger = LoggerFactory.getLogger(ConsumerRegistryPostProcessor.class);
 
-    private BeanDefinitionRegistry registry;
 
     protected ResourceLoader resourceLoader;
+
+    @Override
+    public int getOrder() {
+        return LOWEST_PRECEDENCE - 1;
+    }
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
-    private void scanProducers(Set<String> basePackages, TopicPointInfo producerInfo) throws ClassNotFoundException {
-        ClassScaner classScaner = new ClassScaner();
-        classScaner.setResourceLoader(resourceLoader);
-        Set<Class> clazzes = new HashSet<>();
-        for (String page : basePackages) {
-            List<Class<?>> classes = classScaner.doScan(page);
-            for (Class clz : classes) {
-                clazzes.add(clz);
-            }
-        }
-        for (Class clazz : clazzes) {
-            registerConsumer(clazz, producerInfo);
-        }
-    }
-
-    protected void registerConsumer(Class targetClass, TopicPointInfo producerInfo) throws ClassNotFoundException {
-        String beanName = "$" + targetClass.getSimpleName();
-        String beanClassName = targetClass.getName();
-        Consumer annotation = AnnotationUtils.findAnnotation(targetClass, Consumer.class);
-        if (annotation == null) {
-            return;
-        }
-        logger.debug("即将创建的实例名:" + beanName);
-        producerInfo.setTargetClass(targetClass);
-        producerInfo.setContainerName(annotation.containerFactory());
-        parseVirtualInfo(producerInfo);
-        BeanDefinitionBuilder definition = BeanDefinitionBuilder
-                .genericBeanDefinition(ProducerFactoryBean.class);
-        definition.addPropertyValue("type", beanClassName);
-        definition.addPropertyValue("containerName", annotation.containerFactory());
-        definition.addPropertyValue("producerInfo", producerInfo);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
-        beanDefinition.setPrimary(false);
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, beanName,
-                new String[]{});
-        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
-    }
-
-    private void parseVirtualInfo(TopicPointInfo pointInfo) throws ClassNotFoundException {
-        Class<?> targetClass = pointInfo.getTargetClass();
-        Method[] methods;
-        if (targetClass.isInterface()) {
-            methods = targetClass.getMethods();
-        } else {
-            methods = targetClass.getDeclaredMethods();
-        }
-        for (Method method : methods) {
-            method.setAccessible(true);
-            Routekey routeKeyAnno = method.getAnnotation(Routekey.class);
-            MethodInfo methodInfo = new MethodInfo();
-            pointInfo.putMethodInfo(method, methodInfo);
-            String methodTopic = routeKeyAnno.value();
-            String exchange = routeKeyAnno.exchange();
-            methodInfo.setContainerName(pointInfo.getContainerName());
-            methodInfo.setTargetClass(targetClass);
-            methodInfo.setMethod(method);
-            methodInfo.setRouteKey(methodTopic);
-            methodInfo.setExchange(exchange);
-        }
-    }
-
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.registry = registry;
-        TopicPointInfo producerInfo = new TopicPointInfo();
-        Set<String> basePackages = getComponentScanningPackages(registry);
-        try {
-            scanProducers(basePackages, producerInfo);
-        } catch (ClassNotFoundException e) {
-            logger.error("process registry producer api error ", e);
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (isListener(bean.getClass())) {
+            System.out.println("xxxxxx" + beanName);
+          return   createProxy(bean);
         }
+        return bean;
     }
 
 
-    protected Set<String> getComponentScanningPackages(
-            BeanDefinitionRegistry registry) {
-        Set<String> packages = new LinkedHashSet<String>();
-        String[] names = registry.getBeanDefinitionNames();
-        for (String name : names) {
-            BeanDefinition definition = registry.getBeanDefinition(name);
-            if (definition instanceof AnnotatedBeanDefinition) {
-                AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
-                addComponentScanningPackages(packages,
-                        annotatedDefinition.getMetadata());
+    private Object createProxy(Object delegate) {
+
+        ProxyFactory factory = new ProxyFactory();
+        MqAdvice mqAdvice = new MqAdvice();
+        factory.addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, mqAdvice));
+
+        factory.setProxyTargetClass(true);
+//        factory.addInterface(SimpleMessageListenerContainer.ContainerDelegate.class);
+        factory.setTarget(delegate);
+        Object proxy =  factory.getProxy(delegate.getClass().getClassLoader());
+        return proxy;
+    }
+
+
+    private boolean isListener(Class<?> targetClass) {
+        Collection<Tenant> classLevelListeners = findListenerAnnotations(targetClass);
+        final boolean hasClassLevelListeners = classLevelListeners.size() > 0;
+        final List<Method> multiMethods = new ArrayList<Method>();
+        ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
+
+            @Override
+            public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                Collection<Tenant> listenerAnnotations = findListenerAnnotations(method);
+                classLevelListeners.addAll(listenerAnnotations);
+
             }
-        }
-        return packages;
+        }, ReflectionUtils.USER_DECLARED_METHODS);
+        return classLevelListeners.size() > 0;
     }
 
-    private void addPackages(Set<String> packages, String[] values) {
-        if (values != null) {
-            Collections.addAll(packages, values);
+    private Collection<Tenant> findListenerAnnotations(Class<?> clazz) {
+        Set<Tenant> listeners = new HashSet<Tenant>();
+        Tenant ann = AnnotationUtils.findAnnotation(clazz, Tenant.class);
+        if (ann != null) {
+            listeners.add(ann);
         }
+        return listeners;
     }
 
-    private void addClasses(Set<String> packages, String[] values) {
-        if (values != null) {
-            for (String value : values) {
-                packages.add(ClassUtils.getPackageName(value));
-            }
+    private Collection<Tenant> findListenerAnnotations(Method method) {
+        Set<Tenant> listeners = new HashSet<Tenant>();
+        Tenant ann = AnnotationUtils.findAnnotation(method, Tenant.class);
+        if (ann != null) {
+            listeners.add(ann);
         }
-    }
-
-    private void addComponentScanningPackages(Set<String> packages,
-                                              AnnotationMetadata metadata) {
-        AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
-                .getAnnotationAttributes(ComponentScan.class.getName(), true));
-        if (attributes != null) {
-            addPackages(packages, attributes.getStringArray("value"));
-            addPackages(packages, attributes.getStringArray("basePackages"));
-            addClasses(packages, attributes.getStringArray("basePackageClasses"));
-            if (packages.isEmpty()) {
-                packages.add(ClassUtils.getPackageName(metadata.getClassName()));
-            }
-        }
+        return listeners;
     }
 }
