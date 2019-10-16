@@ -18,18 +18,19 @@ public class MqListener {
 
 
     @Tenant
-//    @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
-//    @RabbitHandler
+    @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
+    @RabbitHandler
     public void listenerShoppeMq(User2 message) {
         System.out.println("==============" + message.getName());
     }
 
-//    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
+    //    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
 //    @RabbitHandler
 //    public void listenerShoppeMq2(Message message) {
 //        System.out.println("========222222======");
 //    }
-@Tenant
+
+    @Tenant
     public void listenerShoppeMq2(User message) {
         System.out.println("========222222======");
     }

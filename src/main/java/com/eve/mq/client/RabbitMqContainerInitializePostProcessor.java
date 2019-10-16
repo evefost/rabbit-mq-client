@@ -29,9 +29,9 @@ import java.util.List;
  * @date 2019/10/12
  */
 @Component
-public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered {
+public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered {
 
-    protected final Logger logger = LoggerFactory.getLogger(RabbitMqInitializePostProcessor.class);
+    protected final Logger logger = LoggerFactory.getLogger(RabbitMqContainerInitializePostProcessor.class);
 
     private ConfigurableListableBeanFactory beanFactory;
 
@@ -90,8 +90,6 @@ public class RabbitMqInitializePostProcessor implements BeanDefinitionRegistryPo
         template.setMessageConverter(messageConverter);
         beanFactory.registerSingleton(templateName, template);
         beanFactory.registerSingleton(containerFactoryName, containerFactory);
-        MqAdvice mqAdvice = new MqAdvice();
-        containerFactory.setAdviceChain(mqAdvice);
     }
 
 

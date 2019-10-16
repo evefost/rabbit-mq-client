@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  * @date 2019/10/15
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Documented
 public @interface Tenant {
 

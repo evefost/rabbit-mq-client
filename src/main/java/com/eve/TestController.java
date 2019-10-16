@@ -29,7 +29,6 @@ public class TestController {
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-        //template.convertAndSend("xie_test","xie-rout-key",user);
         producerApi.sendUser(user);
         return "success";
     }
@@ -60,7 +59,7 @@ public class TestController {
         User2 user = new User2();
         user.setAge(111);
         user.setName("xieayng");
-        mqListener.listenerShoppeMq(user);
+        //mqListener.listenerShoppeMq(user);
         return "success";
     }
 }

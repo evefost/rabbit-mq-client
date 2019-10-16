@@ -2,9 +2,10 @@ package com.eve.mq.client;
 
 import com.eve.mq.client.annotation.Producer;
 import com.eve.mq.client.annotation.Routekey;
-import com.eve.mq.client.support.MethodInfo;
+import com.eve.mq.client.annotation.Tenant;
 import com.eve.mq.client.support.ProducerFactoryBean;
-import com.eve.mq.client.support.TopicPointInfo;
+import com.eve.mq.client.support.ProducerInfo;
+import com.eve.mq.client.support.RabbitMqProducerEndPoint;
 import com.eve.spring.ClassScaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -35,9 +37,9 @@ import java.util.*;
  * @date 2019/10/14
  */
 @Component
-public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor {
+public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor {
 
-    protected final Logger logger = LoggerFactory.getLogger(ProducerApiRegistryPostProcessor.class);
+    protected final Logger logger = LoggerFactory.getLogger(RabbitMqProducerApiRegistryPostProcessor.class);
 
     private BeanDefinitionRegistry registry;
 
@@ -48,7 +50,7 @@ public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, Be
         this.resourceLoader = resourceLoader;
     }
 
-    private void scanProducers(Set<String> basePackages, TopicPointInfo producerInfo) throws ClassNotFoundException {
+    private void scanProducers(Set<String> basePackages, ProducerInfo producerInfo) throws ClassNotFoundException {
         ClassScaner classScaner = new ClassScaner();
         classScaner.setResourceLoader(resourceLoader);
         Set<Class> clazzes = new HashSet<>();
@@ -63,7 +65,7 @@ public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, Be
         }
     }
 
-    protected void registerProducerApi(Class targetClass, TopicPointInfo producerInfo) throws ClassNotFoundException {
+    protected void registerProducerApi(Class targetClass, ProducerInfo producerInfo) throws ClassNotFoundException {
         String beanName = "$" + targetClass.getSimpleName();
         String beanClassName = targetClass.getName();
         Producer annotation = AnnotationUtils.findAnnotation(targetClass, Producer.class);
@@ -87,7 +89,7 @@ public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, Be
         BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
     }
 
-    private void parseVirtualInfo(TopicPointInfo pointInfo) throws ClassNotFoundException {
+    private void parseVirtualInfo(ProducerInfo pointInfo) throws ClassNotFoundException {
         Class<?> targetClass = pointInfo.getTargetClass();
         Method[] methods;
         if (targetClass.isInterface()) {
@@ -95,18 +97,26 @@ public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, Be
         } else {
             methods = targetClass.getDeclaredMethods();
         }
+        Producer annotation = AnnotationUtils.findAnnotation(targetClass, Producer.class);
+        String classExchange = annotation.exchange();
+        Tenant classTenantA = AnnotationUtils.findAnnotation(targetClass, Tenant.class);
         for (Method method : methods) {
             method.setAccessible(true);
-            Routekey routeKeyAnno = method.getAnnotation(Routekey.class);
-            MethodInfo methodInfo = new MethodInfo();
+            Routekey routeKeyA = AnnotationUtils.findAnnotation(method, Routekey.class);
+            Tenant mTenantA = AnnotationUtils.findAnnotation(method, Tenant.class);
+            RabbitMqProducerEndPoint methodInfo = new RabbitMqProducerEndPoint();
             pointInfo.putMethodInfo(method, methodInfo);
-            String methodTopic = routeKeyAnno.value();
-            String exchange = routeKeyAnno.exchange();
+            String methodTopic = routeKeyA.value();
+            String exchange = StringUtils.isEmpty(classExchange) ? routeKeyA.exchange() : classExchange;
+            if (StringUtils.isEmpty(exchange)) {
+                throw new RuntimeException("请配置exchange");
+            }
             methodInfo.setContainerName(pointInfo.getContainerName());
             methodInfo.setTargetClass(targetClass);
             methodInfo.setMethod(method);
             methodInfo.setRouteKey(methodTopic);
             methodInfo.setExchange(exchange);
+            methodInfo.setTenant(classTenantA != null || mTenantA != null);
         }
     }
 
@@ -119,7 +129,7 @@ public class ProducerApiRegistryPostProcessor implements ResourceLoaderAware, Be
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         this.registry = registry;
-        TopicPointInfo producerInfo = new TopicPointInfo();
+        ProducerInfo producerInfo = new ProducerInfo();
         Set<String> basePackages = getComponentScanningPackages(registry);
         try {
             scanProducers(basePackages, producerInfo);

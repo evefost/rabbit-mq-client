@@ -23,7 +23,7 @@ public class ProducerFactoryBean implements FactoryBean<Object>, InitializingBea
 
     private String containerName;
 
-    private TopicPointInfo producerInfo;
+    private ProducerInfo producerInfo;
 
 
     @Override
@@ -49,11 +49,11 @@ public class ProducerFactoryBean implements FactoryBean<Object>, InitializingBea
         this.containerName = containerName;
     }
 
-    public TopicPointInfo getProducerInfo() {
+    public ProducerInfo getProducerInfo() {
         return producerInfo;
     }
 
-    public void setProducerInfo(TopicPointInfo producerInfo) {
+    public void setProducerInfo(ProducerInfo producerInfo) {
         this.producerInfo = producerInfo;
     }
 

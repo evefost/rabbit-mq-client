@@ -8,7 +8,7 @@ package com.eve.common;
  * @version 1.0.0
  * @date 2019/10/15
  */
-public class WrapperData<T> {
+public class WrapperTenant<T> {
 
     private String tenantId;
 

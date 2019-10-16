@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Routekey {
 
-    String exchange();
+    String exchange() default "";
 
     String value();
 }

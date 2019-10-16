@@ -8,9 +8,8 @@ import java.util.Map;
 /**
  * Created by xieyang on 18/7/15.
  */
-public class TopicPointInfo {
+public class ProducerInfo {
 
-    private boolean isProducer;
 
     private String envPrefix;
 
@@ -19,31 +18,29 @@ public class TopicPointInfo {
     private Class targetClass;
 
 
-    private Map<String/*evn+topic:tag*/, MethodInfo> topicMethodMappings = new HashMap<String, MethodInfo>();
+    private Map<String/*evn+topic:tag*/, RabbitMqProducerEndPoint> topicMethodMappings = new HashMap<String, RabbitMqProducerEndPoint>();
 
-    private Map<Method, MethodInfo> methodInfoMappings = new HashMap<Method, MethodInfo>();
+    private Map<Method, RabbitMqProducerEndPoint> methodInfoMappings = new HashMap<Method, RabbitMqProducerEndPoint>();
 
     private Map<String/*topic*/, List<String>/*tag*/> topicTags = new HashMap<>();
 
-    public Map<String, MethodInfo> getTopicMethodMappings() {
+    public Map<String, RabbitMqProducerEndPoint> getTopicMethodMappings() {
         return topicMethodMappings;
     }
 
-    public Map<Method, MethodInfo> getMethodInfoMappings() {
+    public Map<Method, RabbitMqProducerEndPoint> getMethodInfoMappings() {
         return methodInfoMappings;
     }
 
-    public MethodInfo getMethodInfo(String key) {
+    public RabbitMqProducerEndPoint getMethodInfo(String key) {
         return topicMethodMappings.get(key);
     }
 
-    public MethodInfo putMethodInfo(String key, MethodInfo methodInfo) {
+    public RabbitMqProducerEndPoint putMethodInfo(String key, RabbitMqProducerEndPoint methodInfo) {
         return topicMethodMappings.put(key, methodInfo);
     }
 
-    public boolean isProducer() {
-        return isProducer;
-    }
+
 
     public String getEnvPrefix() {
         return envPrefix;
@@ -53,15 +50,12 @@ public class TopicPointInfo {
         this.envPrefix = envPrefix;
     }
 
-    public void setProducer(boolean producer) {
-        isProducer = producer;
-    }
 
-    public MethodInfo getMethodInfo(Method method) {
+    public RabbitMqProducerEndPoint getMethodInfo(Method method) {
         return methodInfoMappings.get(method);
     }
 
-    public MethodInfo putMethodInfo(Method method, MethodInfo methodInfo) {
+    public RabbitMqProducerEndPoint putMethodInfo(Method method, RabbitMqProducerEndPoint methodInfo) {
         return methodInfoMappings.put(method, methodInfo);
     }
 
@@ -94,12 +88,12 @@ public class TopicPointInfo {
     }
 
     public void setTopicMethodMappings(
-            Map<String, MethodInfo> topicMethodMappings) {
+            Map<String, RabbitMqProducerEndPoint> topicMethodMappings) {
         this.topicMethodMappings = topicMethodMappings;
     }
 
     public void setMethodInfoMappings(
-            Map<Method, MethodInfo> methodInfoMappings) {
+            Map<Method, RabbitMqProducerEndPoint> methodInfoMappings) {
         this.methodInfoMappings = methodInfoMappings;
     }
 }

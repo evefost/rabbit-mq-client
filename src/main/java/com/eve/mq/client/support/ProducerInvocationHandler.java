@@ -1,11 +1,15 @@
 package com.eve.mq.client.support;
 
 
+import com.eve.common.ClassUtils;
+import com.eve.common.ServerContextHolder;
+import com.eve.common.WrapperTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationContext;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -21,13 +25,13 @@ public class ProducerInvocationHandler implements InvocationHandler {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 
-    private TopicPointInfo producerInfo;
+    private ProducerInfo producerInfo;
 
     private ApplicationContext applicationContext;
 
     private String envPrefix;
 
-    public ProducerInvocationHandler(TopicPointInfo producerInfo, ApplicationContext applicationContext) {
+    public ProducerInvocationHandler(ProducerInfo producerInfo, ApplicationContext applicationContext) {
         this.producerInfo = producerInfo;
         this.applicationContext = applicationContext;
         this.envPrefix = producerInfo.getEnvPrefix();
@@ -51,12 +55,26 @@ public class ProducerInvocationHandler implements InvocationHandler {
             return method.toString();
         }
 
-        MethodInfo methodInfo = producerInfo.getMethodInfo(method);
+        RabbitMqProducerEndPoint methodInfo = producerInfo.getMethodInfo(method);
         String exchange = methodInfo.getExchange();
         String key = methodInfo.getRouteKey();
 
+
         logger.info("发布消息exchange[{}]routeKey:[{}{}], 方法参数: {}", exchange, key, args);
         if (args != null && args.length == 1) {
+            boolean tenant = methodInfo.isTenant();
+            Object arg = args[0];
+            if (tenant) {
+
+                Field tenantIdF = ClassUtils.fieldExist(arg.getClass(), "tenantId");
+                if (tenantIdF == null) {
+                    throw new RuntimeException("租户消息必须存在tenantId属性");
+                }
+                WrapperTenant wrapperTenant = new WrapperTenant();
+                String tenantId = ServerContextHolder.getTenantId();
+                tenantIdF.setAccessible(true);
+                tenantIdF.set(arg, tenantId);
+            }
             RabbitTemplate template = applicationContext.getBean(methodInfo.getContainerName() + "_template", RabbitTemplate.class);
             template.convertAndSend(methodInfo.getExchange(), key, args[0]);
         } else {
@@ -69,4 +87,5 @@ public class ProducerInvocationHandler implements InvocationHandler {
         return null;
 
     }
+
 }

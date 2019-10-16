@@ -1,8 +1,9 @@
 package com.eve.mq.client;
 
-import com.eve.mq.client.annotation.Tenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.RabbitListeners;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 类说明
@@ -52,58 +56,66 @@ public class ConsumerRegistryPostProcessor implements ResourceLoaderAware, BeanP
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (isListener(bean.getClass())) {
-            System.out.println("xxxxxx" + beanName);
-          return   createProxy(bean);
+        if (isRabbitMqListener(bean.getClass())) {
+            return createProxy(bean);
         }
         return bean;
     }
 
 
     private Object createProxy(Object delegate) {
-
         ProxyFactory factory = new ProxyFactory();
-        MqAdvice mqAdvice = new MqAdvice();
+        RabbitMqListerTenantAdvice mqAdvice = new RabbitMqListerTenantAdvice();
         factory.addAdvisor(new DefaultPointcutAdvisor(Pointcut.TRUE, mqAdvice));
-
         factory.setProxyTargetClass(true);
-//        factory.addInterface(SimpleMessageListenerContainer.ContainerDelegate.class);
         factory.setTarget(delegate);
-        Object proxy =  factory.getProxy(delegate.getClass().getClassLoader());
+        Object proxy = factory.getProxy(delegate.getClass().getClassLoader());
         return proxy;
     }
 
 
-    private boolean isListener(Class<?> targetClass) {
-        Collection<Tenant> classLevelListeners = findListenerAnnotations(targetClass);
+    private boolean isRabbitMqListener(Class<?> targetClass) {
+        Collection<RabbitListener> classLevelListeners = findListenerAnnotations(targetClass);
         final boolean hasClassLevelListeners = classLevelListeners.size() > 0;
-        final List<Method> multiMethods = new ArrayList<Method>();
+        if (hasClassLevelListeners) {
+            return true;
+        }
         ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
 
             @Override
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                Collection<Tenant> listenerAnnotations = findListenerAnnotations(method);
+                Collection<RabbitListener> listenerAnnotations = findListenerAnnotations(method);
                 classLevelListeners.addAll(listenerAnnotations);
-
             }
         }, ReflectionUtils.USER_DECLARED_METHODS);
+
         return classLevelListeners.size() > 0;
     }
 
-    private Collection<Tenant> findListenerAnnotations(Class<?> clazz) {
-        Set<Tenant> listeners = new HashSet<Tenant>();
-        Tenant ann = AnnotationUtils.findAnnotation(clazz, Tenant.class);
+
+    private Collection<RabbitListener> findListenerAnnotations(Class<?> clazz) {
+        Set<RabbitListener> listeners = new HashSet<RabbitListener>();
+        RabbitListener ann = AnnotationUtils.findAnnotation(clazz, RabbitListener.class);
         if (ann != null) {
             listeners.add(ann);
+        }
+        RabbitListeners anns = AnnotationUtils.findAnnotation(clazz, RabbitListeners.class);
+        if (anns != null) {
+            Collections.addAll(listeners, anns.value());
         }
         return listeners;
     }
 
-    private Collection<Tenant> findListenerAnnotations(Method method) {
-        Set<Tenant> listeners = new HashSet<Tenant>();
-        Tenant ann = AnnotationUtils.findAnnotation(method, Tenant.class);
+
+    private Collection<RabbitListener> findListenerAnnotations(Method method) {
+        Set<RabbitListener> listeners = new HashSet<RabbitListener>();
+        RabbitListener ann = AnnotationUtils.findAnnotation(method, RabbitListener.class);
         if (ann != null) {
             listeners.add(ann);
+        }
+        RabbitListeners anns = AnnotationUtils.findAnnotation(method, RabbitListeners.class);
+        if (anns != null) {
+            Collections.addAll(listeners, anns.value());
         }
         return listeners;
     }

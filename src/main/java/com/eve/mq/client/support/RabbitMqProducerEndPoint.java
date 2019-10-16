@@ -1,27 +1,18 @@
 package com.eve.mq.client.support;
 
-import java.lang.reflect.Method;
+import com.eve.mq.client.BaseMqProducerEndPoint;
 
 /**
  * @author xieyang
  * @date 18/7/14
  */
-public class MethodInfo {
+public class RabbitMqProducerEndPoint extends BaseMqProducerEndPoint {
 
-
-    private Class targetClass;
-
-    private Method method;
-
+    private String containerName;
 
     private String exchange;
 
     private String routeKey;
-
-
-    private Object target;
-
-    private String containerName;
 
     public String getExchange() {
         return exchange;
@@ -39,14 +30,6 @@ public class MethodInfo {
         this.containerName = containerName;
     }
 
-    public Object getTarget() {
-        return target;
-    }
-
-    public void setTarget(Object target) {
-        this.target = target;
-    }
-
     public String getRouteKey() {
         return routeKey;
     }
@@ -55,19 +38,4 @@ public class MethodInfo {
         this.routeKey = routeKey;
     }
 
-    public Method getMethod() {
-        return method;
-    }
-
-    public void setMethod(Method method) {
-        this.method = method;
-    }
-
-    public Class getTargetClass() {
-        return targetClass;
-    }
-
-    public void setTargetClass(Class targetClass) {
-        this.targetClass = targetClass;
-    }
 }
