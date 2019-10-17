@@ -2,6 +2,7 @@ package com.eve.mq.client.rabbit;
 
 import com.eve.mq.client.rabbit.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
+import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -27,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0.0
  * @date 2019/10/12
  */
-@Component
 public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqContainerInitializePostProcessor.class);
@@ -35,6 +35,13 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
     private ConfigurableListableBeanFactory beanFactory;
 
     static Map<String, RabbitmqProperties> rabbitmqPropertiesMap = new ConcurrentHashMap<>();
+
+    private RabbitMqListerAdvice[] adviceChain;
+
+    public RabbitMqContainerInitializePostProcessor(RabbitMqListerAdvice[] adviceChain){
+        this.adviceChain = adviceChain;
+    }
+
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -88,7 +95,7 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
         containerFactory.setConcurrentConsumers(properties.getConcurrency());
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setMessageConverter(messageConverter);
-        containerFactory.setAdviceChain(advice);
+        containerFactory.setAdviceChain( this.adviceChain);
 
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);

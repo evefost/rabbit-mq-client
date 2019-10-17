@@ -35,7 +35,7 @@ import static com.eve.mq.client.rabbit.RabbitMqContainerInitializePostProcessor.
  * @version 1.0.0
  * @date 2019/10/14
  */
-@Component
+
 public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor, PriorityOrdered {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqProducerApiRegistryPostProcessor.class);

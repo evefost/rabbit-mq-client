@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * 拦截租户信息(多租户)
@@ -16,7 +17,8 @@ import org.springframework.amqp.core.MessageProperties;
  * @version 1.0.0
  * @date 2019/10/15
  */
-public class RabbitMqListerTenantAdvice implements MethodInterceptor {
+@Component
+public class RabbitMqListerTenantAdvice implements RabbitMqListerAdvice {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqListerTenantAdvice.class);
 
