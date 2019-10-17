@@ -1,7 +1,6 @@
 package com.eve.mq.client.rabbit.annotation;
 
 import com.eve.common.annotation.AsProperties;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.annotation.*;
@@ -29,13 +28,6 @@ public @interface AsRabbitmqProperties {
      * bean name.
      */
     String containerFactory() default "";
-
-    /**
-     *
-     * The bean name of the {@link RabbitTemplate }
-     * @return
-     */
-    String templateName() default "";
 
 
 }

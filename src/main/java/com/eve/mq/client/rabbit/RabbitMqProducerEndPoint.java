@@ -3,6 +3,7 @@ package com.eve.mq.client.rabbit;
 import com.eve.mq.client.BaseMqProducerEndPoint;
 
 /**
+ * rabbit mq 端点信息
  * @author xieyang
  * @date 18/7/14
  */

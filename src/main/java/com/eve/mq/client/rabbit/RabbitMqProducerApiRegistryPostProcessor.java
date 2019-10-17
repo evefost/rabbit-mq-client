@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.*;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.ResourceLoader;
@@ -24,8 +25,10 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static com.eve.mq.client.rabbit.RabbitMqContainerInitializePostProcessor.rabbitmqPropertiesMap;
+
 /**
- * 类说明
+ *  注入生产者接口实例
  * <p>
  *
  * @author 谢洋
@@ -33,7 +36,7 @@ import java.util.*;
  * @date 2019/10/14
  */
 @Component
-public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor {
+public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderAware, BeanDefinitionRegistryPostProcessor, PriorityOrdered {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqProducerApiRegistryPostProcessor.class);
 
@@ -46,6 +49,23 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
         this.resourceLoader = resourceLoader;
     }
 
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        ProducerInfo producerInfo = new ProducerInfo();
+        Set<String> basePackages = getComponentScanningPackages(registry);
+        try {
+            scanProducers(basePackages, producerInfo);
+        } catch (ClassNotFoundException e) {
+            logger.error("process registry producer api error ", e);
+        }
+    }
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        this.registry = registry;
+
+    }
     private void scanProducers(Set<String> basePackages, ProducerInfo producerInfo) throws ClassNotFoundException {
         ClassScaner classScaner = new ClassScaner();
         classScaner.setResourceLoader(resourceLoader);
@@ -69,8 +89,12 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
             return;
         }
         logger.debug("即将创建的实例名:" + beanName);
+        String containerFactory = annotation.containerFactory();
+        if (rabbitmqPropertiesMap.get(containerFactory) == null) {
+            throw new RuntimeException(beanClassName + "[" + containerFactory + "]不存在");
+        }
         producerInfo.setTargetClass(targetClass);
-        producerInfo.setContainerName(annotation.containerFactory());
+        producerInfo.setContainerName(containerFactory);
         parseVirtualInfo(producerInfo);
         BeanDefinitionBuilder definition = BeanDefinitionBuilder
                 .genericBeanDefinition(ProducerFactoryBean.class);
@@ -101,7 +125,7 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
             RabbitMqProducerEndPoint methodInfo = new RabbitMqProducerEndPoint();
             pointInfo.putMethodInfo(method, methodInfo);
             String methodTopic = routeKeyA.value();
-            String exchange = StringUtils.isEmpty(classExchange) ? routeKeyA.exchange() : classExchange;
+            String exchange = classExchange;
             if (StringUtils.isEmpty(exchange)) {
                 throw new RuntimeException("请配置exchange");
             }
@@ -114,22 +138,7 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
     }
 
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
-    }
-
-    @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.registry = registry;
-        ProducerInfo producerInfo = new ProducerInfo();
-        Set<String> basePackages = getComponentScanningPackages(registry);
-        try {
-            scanProducers(basePackages, producerInfo);
-        } catch (ClassNotFoundException e) {
-            logger.error("process registry producer api error ", e);
-        }
-    }
 
 
     protected Set<String> getComponentScanningPackages(
@@ -173,5 +182,10 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
                 packages.add(ClassUtils.getPackageName(metadata.getClassName()));
             }
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE + 11;
     }
 }

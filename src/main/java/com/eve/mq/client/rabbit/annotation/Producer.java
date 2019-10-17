@@ -22,7 +22,7 @@ public @interface Producer {
      */
     String containerFactory() default "";
 
-    String exchange() default "";
+    String exchange();
 
 
 }

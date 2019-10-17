@@ -4,7 +4,7 @@ package com.eve.common.annotation;
 import java.lang.annotation.*;
 
 /**
- * 类说明
+ * 标记为属性配置
  * <p>
  *
  * @author 谢洋

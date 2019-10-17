@@ -1,5 +1,7 @@
 package com.eve;
 
+import com.eve.mq.client.MessagePublisher;
+import com.eve.mq.client.rabbit.RabbitMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +20,9 @@ public class TestController {
 //    @Resource(name = "aaa")
 //    RabbitTemplate template;
 
-//    @Resource(name = "bbb")
-//    RabbitTemplate template2;
+
+    @Autowired
+    MessagePublisher messagePublisher;
 
     @Autowired
     private TestProducerApi producerApi;
@@ -38,7 +41,12 @@ public class TestController {
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-        //template2.convertAndSend("xie_test","xie-rout-key",user);
+        RabbitMessage<User> message = new RabbitMessage<>();
+//        message.setExchange("xie_test");
+        message.setRouteKey("xie-rout-key");
+        message.setContainerFactory("container_2");
+        message.setData(user);
+        messagePublisher.publish(message);
         return "success";
     }
 

@@ -9,7 +9,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
 /**
- * 类说明
+ * 拦截租户信息(多租户)
  * <p>
  *
  * @author 谢洋
@@ -39,13 +39,9 @@ public class RabbitMqListerTenantAdvice implements MethodInterceptor {
         ServerContextHolder.setTenantId(tenantId);
     }
 
-
     private void doAfter(MethodInvocation invocation) {
         ServerContextHolder.setTenantId(null);
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
+
 }

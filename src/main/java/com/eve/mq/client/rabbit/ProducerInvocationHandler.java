@@ -1,15 +1,9 @@
 package com.eve.mq.client.rabbit;
 
 
-import com.eve.common.ServerContextHolder;
+import com.eve.mq.client.MessagePublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -27,13 +21,13 @@ public class ProducerInvocationHandler implements InvocationHandler {
 
     private ProducerInfo producerInfo;
 
-    private ApplicationContext applicationContext;
-
     private String envPrefix;
 
-    public ProducerInvocationHandler(ProducerInfo producerInfo, ApplicationContext applicationContext) {
+    private MessagePublisher<RabbitMessage> publisher;
+
+    public ProducerInvocationHandler(ProducerInfo producerInfo, MessagePublisher<RabbitMessage> publisher) {
         this.producerInfo = producerInfo;
-        this.applicationContext = applicationContext;
+        this.publisher = publisher;
         this.envPrefix = producerInfo.getEnvPrefix();
     }
 
@@ -54,22 +48,15 @@ public class ProducerInvocationHandler implements InvocationHandler {
         } else if ("toString".equals(method.getName())) {
             return method.toString();
         }
-
-        RabbitMqProducerEndPoint methodInfo = producerInfo.getMethodInfo(method);
-        String exchange = methodInfo.getExchange();
-        String key = methodInfo.getRouteKey();
-        String tenantId = ServerContextHolder.getTenantId();
-        logger.info("发布消息exchange[{}]routeKey:[{}],tenantId[{}]  方法参数: {}", exchange, key, tenantId, args);
         if (args != null && args.length == 1) {
             Object targetMsg = args[0];
-            Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
-            MessageProperties messageProperties = new MessageProperties();
-            if (!StringUtils.isEmpty(tenantId)) {
-                messageProperties.setHeader("tenantId", tenantId);
-            }
-            Message message = messageConverter.toMessage(targetMsg, messageProperties);
-            RabbitTemplate template = applicationContext.getBean(methodInfo.getContainerName() + "_template", RabbitTemplate.class);
-            template.convertAndSend(methodInfo.getExchange(), key, message);
+            RabbitMqProducerEndPoint methodInfo = producerInfo.getMethodInfo(method);
+            RabbitMessage message = new RabbitMessage();
+            message.setExchange(methodInfo.getExchange());
+            message.setRouteKey(methodInfo.getRouteKey());
+            message.setContainerFactory(methodInfo.getContainerName());
+            message.setData(targetMsg);
+            publisher.publish(message);
         } else {
             throw new RuntimeException("multiple parameters are not support");
         }

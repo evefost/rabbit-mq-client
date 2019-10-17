@@ -16,7 +16,6 @@
 
 package com.eve.mq.client;
 
-import com.eve.common.PropertiesInfo;
 import com.eve.common.annotation.AsProperties;
 import com.eve.mq.client.rabbit.RabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
@@ -60,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * 提前注入配置属性到bean里
  * {@link BeanPostProcessor} to bind {@link PropertySources} to beans annotated with
  * {@link ConfigurationProperties}.
  *
@@ -274,20 +274,20 @@ public class PrePropertiesBindingPostProcessor implements BeanDefinitionRegistry
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
-        List<PropertiesInfo<RabbitmqProperties>> propertiesInfos = null;
+        List<PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsProperties>> propertiesInfos = null;
         try {
             propertiesInfos = PropertiesUtils.scanProperties(beanFactory, RabbitmqProperties.class, AsProperties.class);
         } catch (Exception e) {
             logger.error("pre binding properties error :", e);
         }
         //注入属性值
-        for (PropertiesInfo<RabbitmqProperties> p : propertiesInfos) {
+        for (PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsProperties> p : propertiesInfos) {
             doPreInitProperties(p);
         }
     }
 
 
-    private void doPreInitProperties(PropertiesInfo<RabbitmqProperties> propertiesInfo)
+    private void doPreInitProperties(PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsProperties> propertiesInfo)
             throws BeansException {
         Object bean = propertiesInfo.getProperties();
         String beanName = propertiesInfo.getBeanName();

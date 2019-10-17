@@ -28,7 +28,8 @@ class ProducerFactoryBean implements FactoryBean<Object>, InitializingBean, Appl
 
     @Override
     public Object getObject() throws Exception {
-        Object proxy = Proxy.newProxyInstance(ProducerFactoryBean.class.getClassLoader(), new Class[]{type}, new ProducerInvocationHandler(producerInfo, applicationContext));
+        RabbitMqPublisher bean = applicationContext.getBean(RabbitMqPublisher.class);
+        Object proxy = Proxy.newProxyInstance(ProducerFactoryBean.class.getClassLoader(), new Class[]{type}, new ProducerInvocationHandler(producerInfo, bean));
         return proxy;
     }
 
@@ -79,7 +80,7 @@ class ProducerFactoryBean implements FactoryBean<Object>, InitializingBean, Appl
 
     @Override
     public String toString() {
-        return new StringBuilder("MyTestFactoryBean{")
+        return new StringBuilder("ProducerFactoryBean{")
                 .append("type=").append(type).append(", ")
                 .append("}").toString();
     }

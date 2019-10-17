@@ -1,6 +1,5 @@
 package com.eve.mq.client.rabbit;
 
-import com.eve.common.PropertiesInfo;
 import com.eve.mq.client.rabbit.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
 import org.slf4j.Logger;
@@ -14,14 +13,14 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 类说明
+ * 初始化rabbit mq containers
  * <p>
  *
  * @author 谢洋
@@ -35,10 +34,12 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
 
     private ConfigurableListableBeanFactory beanFactory;
 
+    static Map<String, RabbitmqProperties> rabbitmqPropertiesMap = new ConcurrentHashMap<>();
+
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
-        List<PropertiesInfo<RabbitmqProperties>> propertiesInfos = null;
+        List<PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsRabbitmqProperties>> propertiesInfos = null;
         try {
             propertiesInfos = PropertiesUtils.scanProperties(beanFactory, RabbitmqProperties.class, AsRabbitmqProperties.class);
         } catch (Exception e) {
@@ -48,6 +49,7 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
             return;
         }
         createMqClient(propertiesInfos);
+
     }
 
 
@@ -57,18 +59,18 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
     }
 
 
-    public void createMqClient(List<PropertiesInfo<RabbitmqProperties>> propertiesInfos) {
-        for (PropertiesInfo<RabbitmqProperties> propertiesInfo : propertiesInfos) {
+    public void createMqClient(List<PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsRabbitmqProperties>> propertiesInfos) {
+        for (PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsRabbitmqProperties> propertiesInfo : propertiesInfos) {
             registerRabbitMqClients(propertiesInfo);
         }
 
     }
 
-    private void registerRabbitMqClients(PropertiesInfo<RabbitmqProperties> propertiesInfo) {
+    private void registerRabbitMqClients(PropertiesUtils.PropertiesInfo<RabbitmqProperties, AsRabbitmqProperties> propertiesInfo) {
         RabbitmqProperties properties = propertiesInfo.getProperties();
-        Method method = propertiesInfo.getMethod();
-        AsRabbitmqProperties annotation = AnnotationUtils.findAnnotation(method, AsRabbitmqProperties.class);
+        AsRabbitmqProperties annotation = propertiesInfo.getAnnotation();
         String containerFactoryName = annotation.containerFactory();
+        rabbitmqPropertiesMap.put(containerFactoryName, properties);
         String templateName = containerFactoryName + "_template";
         logger.info("register rabbit mq containerFactory beanName:[{}] template beanName:[{}]", containerFactoryName, templateName);
 
