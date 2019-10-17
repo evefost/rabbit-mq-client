@@ -1,7 +1,7 @@
-package com.eve.mq.client;
+package com.eve.mq.client.rabbit;
 
 import com.eve.common.PropertiesInfo;
-import com.eve.mq.client.annotation.AsRabbitmqProperties;
+import com.eve.mq.client.rabbit.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +41,11 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
         List<PropertiesInfo<RabbitmqProperties>> propertiesInfos = null;
         try {
             propertiesInfos = PropertiesUtils.scanProperties(beanFactory, RabbitmqProperties.class, AsRabbitmqProperties.class);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("scan rabbit mq properties failure:", e);
+        }
+        if (propertiesInfos == null || propertiesInfos.isEmpty()) {
+            return;
         }
         createMqClient(propertiesInfos);
     }
@@ -58,15 +59,18 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
 
     public void createMqClient(List<PropertiesInfo<RabbitmqProperties>> propertiesInfos) {
         for (PropertiesInfo<RabbitmqProperties> propertiesInfo : propertiesInfos) {
-            regiestRabbitMqClient(propertiesInfo);
+            registerRabbitMqClients(propertiesInfo);
         }
 
     }
 
-    private void regiestRabbitMqClient(PropertiesInfo<RabbitmqProperties> propertiesInfo) {
+    private void registerRabbitMqClients(PropertiesInfo<RabbitmqProperties> propertiesInfo) {
         RabbitmqProperties properties = propertiesInfo.getProperties();
         Method method = propertiesInfo.getMethod();
         AsRabbitmqProperties annotation = AnnotationUtils.findAnnotation(method, AsRabbitmqProperties.class);
+        String containerFactoryName = annotation.containerFactory();
+        String templateName = containerFactoryName + "_template";
+        logger.info("register rabbit mq containerFactory beanName:[{}] template beanName:[{}]", containerFactoryName, templateName);
 
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setAddresses(properties.getAddress());
@@ -75,21 +79,21 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
         connectionFactory.setVirtualHost(properties.getVirtualHost());
         connectionFactory.setPublisherConfirms(true);
 
-        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
-
-        String containerFactoryName = annotation.containerFactory();
-        String templateName = containerFactoryName + "_template";
-        logger.info("rabbit mq containerFactory beanName:[{}] template beanName:[{}[]", containerFactoryName, templateName);
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
+        Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
+        RabbitMqListerTenantAdvice advice = new RabbitMqListerTenantAdvice();
         containerFactory.setPrefetchCount(properties.getPrefetchCount());
         containerFactory.setConcurrentConsumers(properties.getConcurrency());
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setMessageConverter(messageConverter);
+        containerFactory.setAdviceChain(advice);
 
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
+
         beanFactory.registerSingleton(templateName, template);
         beanFactory.registerSingleton(containerFactoryName, containerFactory);
+
     }
 
 

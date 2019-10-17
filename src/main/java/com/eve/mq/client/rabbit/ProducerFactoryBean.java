@@ -1,4 +1,4 @@
-package com.eve.mq.client.support;
+package com.eve.mq.client.rabbit;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
@@ -13,7 +13,7 @@ import java.lang.reflect.Proxy;
 /**
  * 生产bean处理
  */
-public class ProducerFactoryBean implements FactoryBean<Object>, InitializingBean, ApplicationContextAware, EnvironmentAware {
+class ProducerFactoryBean implements FactoryBean<Object>, InitializingBean, ApplicationContextAware, EnvironmentAware {
 
     private ApplicationContext applicationContext;
 

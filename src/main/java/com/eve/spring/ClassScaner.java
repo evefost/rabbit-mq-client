@@ -125,7 +125,6 @@ public class ClassScaner implements ResourceLoaderAware {
                         try {
                             classes.add(Class.forName(metadataReader.getClassMetadata().getClassName()));
                         } catch (ClassNotFoundException e) {
-                            //e.printStackTrace();
                             LOGGER.error(e.getMessage(), e);
                         }
                     }

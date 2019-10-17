@@ -1,11 +1,7 @@
-package com.eve.mq.client;
+package com.eve.mq.client.rabbit;
 
-import com.eve.mq.client.annotation.Producer;
-import com.eve.mq.client.annotation.Routekey;
-import com.eve.mq.client.annotation.Tenant;
-import com.eve.mq.client.support.ProducerFactoryBean;
-import com.eve.mq.client.support.ProducerInfo;
-import com.eve.mq.client.support.RabbitMqProducerEndPoint;
+import com.eve.mq.client.rabbit.annotation.Producer;
+import com.eve.mq.client.rabbit.annotation.Routekey;
 import com.eve.spring.ClassScaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,11 +95,9 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
         }
         Producer annotation = AnnotationUtils.findAnnotation(targetClass, Producer.class);
         String classExchange = annotation.exchange();
-        Tenant classTenantA = AnnotationUtils.findAnnotation(targetClass, Tenant.class);
         for (Method method : methods) {
             method.setAccessible(true);
             Routekey routeKeyA = AnnotationUtils.findAnnotation(method, Routekey.class);
-            Tenant mTenantA = AnnotationUtils.findAnnotation(method, Tenant.class);
             RabbitMqProducerEndPoint methodInfo = new RabbitMqProducerEndPoint();
             pointInfo.putMethodInfo(method, methodInfo);
             String methodTopic = routeKeyA.value();
@@ -116,7 +110,6 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
             methodInfo.setMethod(method);
             methodInfo.setRouteKey(methodTopic);
             methodInfo.setExchange(exchange);
-            methodInfo.setTenant(classTenantA != null || mTenantA != null);
         }
     }
 

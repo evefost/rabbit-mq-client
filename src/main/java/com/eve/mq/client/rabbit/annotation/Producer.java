@@ -1,4 +1,4 @@
-package com.eve.mq.client.annotation;
+package com.eve.mq.client.rabbit.annotation;
 
 import java.lang.annotation.*;
 

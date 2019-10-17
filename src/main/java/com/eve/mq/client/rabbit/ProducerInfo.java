@@ -1,4 +1,4 @@
-package com.eve.mq.client.support;
+package com.eve.mq.client.rabbit;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

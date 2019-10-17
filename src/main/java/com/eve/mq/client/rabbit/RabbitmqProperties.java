@@ -1,4 +1,4 @@
-package com.eve.mq.client;
+package com.eve.mq.client.rabbit;
 
 /**
  * 类说明

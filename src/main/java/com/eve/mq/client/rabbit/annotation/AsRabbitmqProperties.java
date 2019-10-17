@@ -1,4 +1,4 @@
-package com.eve.mq.client.annotation;
+package com.eve.mq.client.rabbit.annotation;
 
 import com.eve.common.annotation.AsProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

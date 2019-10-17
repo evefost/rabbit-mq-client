@@ -14,8 +14,6 @@ public class BaseMqProducerEndPoint {
 
     private Method method;
 
-    private boolean isTenant;
-
     public Class getTargetClass() {
         return targetClass;
     }
@@ -40,11 +38,4 @@ public class BaseMqProducerEndPoint {
         this.method = method;
     }
 
-    public boolean isTenant() {
-        return isTenant;
-    }
-
-    public void setTenant(boolean tenant) {
-        isTenant = tenant;
-    }
 }

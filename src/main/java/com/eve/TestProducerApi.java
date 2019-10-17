@@ -1,8 +1,7 @@
 package com.eve;
 
-import com.eve.mq.client.annotation.Producer;
-import com.eve.mq.client.annotation.Routekey;
-import com.eve.mq.client.annotation.Tenant;
+import com.eve.mq.client.rabbit.annotation.Producer;
+import com.eve.mq.client.rabbit.annotation.Routekey;
 
 /**
  * 类说明
@@ -15,7 +14,6 @@ import com.eve.mq.client.annotation.Tenant;
 @Producer(exchange = "xie_test", containerFactory = "container_2")
 public interface TestProducerApi {
 
-    @Tenant
     @Routekey(value = "xie-rout-key")
     void sendUser(User user);
 

@@ -1,7 +1,7 @@
 package com.eve;
 
-import com.eve.mq.client.RabbitmqProperties;
-import com.eve.mq.client.annotation.AsRabbitmqProperties;
+import com.eve.mq.client.rabbit.RabbitmqProperties;
+import com.eve.mq.client.rabbit.annotation.AsRabbitmqProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

@@ -1,6 +1,6 @@
 package com.eve;
 
-import com.eve.mq.client.annotation.Tenant;
+import com.eve.common.ServerContextHolder;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,10 @@ import org.springframework.stereotype.Component;
 public class MqListener {
 
 
-    @Tenant
     @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
     @RabbitHandler
     public void listenerShoppeMq(User2 message) {
-        System.out.println("==============" + message.getName());
+        System.out.println("业务端处理tenantId:" + ServerContextHolder.getTenantId());
     }
 
     //    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
@@ -30,7 +29,6 @@ public class MqListener {
 //        System.out.println("========222222======");
 //    }
 
-    @Tenant
     public void listenerShoppeMq2(User message) {
         System.out.println("========222222======");
     }

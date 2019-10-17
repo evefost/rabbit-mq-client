@@ -18,6 +18,7 @@ package com.eve.mq.client;
 
 import com.eve.common.PropertiesInfo;
 import com.eve.common.annotation.AsProperties;
+import com.eve.mq.client.rabbit.RabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
