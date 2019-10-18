@@ -2,7 +2,6 @@ package com.eve.mq.client.rabbit;
 
 import com.eve.mq.client.rabbit.annotation.AsRabbitmqProperties;
 import com.eve.spring.PropertiesUtils;
-import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -35,10 +33,10 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
     private ConfigurableListableBeanFactory beanFactory;
 
     static Map<String, RabbitmqProperties> rabbitmqPropertiesMap = new ConcurrentHashMap<>();
+    private List<RabbitMqListerAdvice> adviceChain;
 
-    private RabbitMqListerAdvice[] adviceChain;
 
-    public RabbitMqContainerInitializePostProcessor(RabbitMqListerAdvice[] adviceChain){
+    public RabbitMqContainerInitializePostProcessor(List<RabbitMqListerAdvice> adviceChain) {
         this.adviceChain = adviceChain;
     }
 
@@ -90,13 +88,16 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
 
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
-        RabbitMqListerTenantAdvice advice = new RabbitMqListerTenantAdvice();
         containerFactory.setPrefetchCount(properties.getPrefetchCount());
         containerFactory.setConcurrentConsumers(properties.getConcurrency());
         containerFactory.setConnectionFactory(connectionFactory);
         containerFactory.setMessageConverter(messageConverter);
-        containerFactory.setAdviceChain( this.adviceChain);
 
+        if (adviceChain != null && adviceChain.size() > 0) {
+            RabbitMqListerAdvice[] array = new RabbitMqListerAdvice[adviceChain.size()];
+            adviceChain.toArray(array);
+            containerFactory.setAdviceChain(array);
+        }
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
 

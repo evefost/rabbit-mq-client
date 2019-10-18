@@ -6,10 +6,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
@@ -20,15 +17,15 @@ import org.springframework.util.StringUtils;
  * @version 1.0.0
  * @date 2019/10/17
  */
-@Component
-public class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>>, ApplicationContextAware {
+
+class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
 
     private ApplicationContext applicationContext;
 
     private Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+
+    public RabbitMqPublisher(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -48,7 +45,6 @@ public class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>>,
         if (StringUtils.isEmpty(message.getRouteKey())) {
             throw new RuntimeException("请配置routeKey");
         }
-
     }
 
 
@@ -60,7 +56,7 @@ public class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>>,
         MessageProperties messageProperties = new MessageProperties();
         String tenantId = ServerContextHolder.getTenantId();
         if (!StringUtils.isEmpty(tenantId)) {
-            messageProperties.setHeader("tenantId", tenantId);
+            messageProperties.setHeader("tenant-id", tenantId);
         }
         Message message = messageConverter.toMessage(sourceMsg.getData(), messageProperties);
         template.convertAndSend(exchange, routeKey, message);

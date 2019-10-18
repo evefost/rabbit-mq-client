@@ -2,7 +2,6 @@ package com.eve.mq.client.rabbit;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,29 +16,12 @@ public class ProducerInfo {
 
     private Class targetClass;
 
-
-    private Map<String/*evn+topic:tag*/, RabbitMqProducerEndPoint> topicMethodMappings = new HashMap<String, RabbitMqProducerEndPoint>();
-
     private Map<Method, RabbitMqProducerEndPoint> methodInfoMappings = new HashMap<Method, RabbitMqProducerEndPoint>();
 
-    private Map<String/*topic*/, List<String>/*tag*/> topicTags = new HashMap<>();
-
-    public Map<String, RabbitMqProducerEndPoint> getTopicMethodMappings() {
-        return topicMethodMappings;
-    }
 
     public Map<Method, RabbitMqProducerEndPoint> getMethodInfoMappings() {
         return methodInfoMappings;
     }
-
-    public RabbitMqProducerEndPoint getMethodInfo(String key) {
-        return topicMethodMappings.get(key);
-    }
-
-    public RabbitMqProducerEndPoint putMethodInfo(String key, RabbitMqProducerEndPoint methodInfo) {
-        return topicMethodMappings.put(key, methodInfo);
-    }
-
 
 
     public String getEnvPrefix() {
@@ -75,22 +57,6 @@ public class ProducerInfo {
         this.targetClass = targetClass;
     }
 
-    public Map<String, List<String>> getTopicTags() {
-        return topicTags;
-    }
-
-    public void setTopicTags(Map<String, List<String>> topicTags) {
-        this.topicTags = topicTags;
-    }
-
-    public List<String> getTags(String topic) {
-        return this.topicTags.get(topic);
-    }
-
-    public void setTopicMethodMappings(
-            Map<String, RabbitMqProducerEndPoint> topicMethodMappings) {
-        this.topicMethodMappings = topicMethodMappings;
-    }
 
     public void setMethodInfoMappings(
             Map<Method, RabbitMqProducerEndPoint> methodInfoMappings) {

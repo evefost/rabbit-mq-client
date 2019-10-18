@@ -1,9 +1,8 @@
 package com.eve.mq.client.rabbit;
 
-import com.eve.MqListener;
-import org.aopalliance.aop.Advice;
-import org.springframework.beans.factory.InitializingBean;
+import com.eve.mq.client.RabbitMqListerTenantAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,14 +12,11 @@ import java.util.List;
  * Created by xieyang on 19/10/17.
  */
 @Configuration
-public class RabbitMqAutoconfiguration implements InitializingBean{
-
-
+public class RabbitMqAutoconfiguration {
 
 
     @Bean
-    RabbitMqContainerInitializePostProcessor rabbitMqContainerInitializePostProcessor(@Autowired(required = false) RabbitMqListerAdvice[] advice){
-
+    RabbitMqContainerInitializePostProcessor rabbitMqContainerInitializePostProcessor(@Autowired(required = false) List<RabbitMqListerAdvice> advice) {
         return new RabbitMqContainerInitializePostProcessor(advice);
     }
 
@@ -29,8 +25,14 @@ public class RabbitMqAutoconfiguration implements InitializingBean{
         return new RabbitMqProducerApiRegistryPostProcessor();
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.printf("");
+    @Bean
+    RabbitMqPublisher mqPublisher(ApplicationContext applicationContext) {
+        return new RabbitMqPublisher(applicationContext);
     }
+
+    @Bean
+    RabbitMqListerTenantAdvice rabbitMqListerTenantAdvice() {
+        return new RabbitMqListerTenantAdvice();
+    }
+
 }
