@@ -38,9 +38,9 @@ public class RabbitMqListerContextAdvice implements RabbitMqListerAdvice {
         Message message = (Message) invocation.getArguments()[1];
         MessageProperties messageProperties = message.getMessageProperties();
         String tenantId = (String) messageProperties.getHeaders().get("tenant-id");
-        String uuid = (String) messageProperties.getHeaders().get("uuid");
+        String uuid = (String) messageProperties.getHeaders().get("log-uuid");
         ServerContextHolder.setTenantId(tenantId);
-        ServerContextHolder.setData("uuid", uuid);
+        ServerContextHolder.setData("log-uuid", uuid);
         if (logger.isDebugEnabled()) {
             String consumerQueue = messageProperties.getConsumerQueue();
             logger.debug("收到消息queue[{}] tenantId[{}]", consumerQueue, tenantId);

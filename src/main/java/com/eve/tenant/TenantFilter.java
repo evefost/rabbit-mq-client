@@ -36,13 +36,14 @@ public class TenantFilter implements Filter, ApplicationContextAware {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String tenantId = tenantMappingAdapter.getTenantId(servletRequest);
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        String uuid = request.getHeader("uuid");
-        ServerContextHolder.setData("uuid", uuid);
+        String uuid = request.getHeader("log-uuid");
+        ServerContextHolder.setData("log-uuid", uuid);
         ServerContextHolder.setTenantId(tenantId);
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             ServerContextHolder.setTenantId(null);
+            ServerContextHolder.setData("log-uuid", null);
         }
     }
 
