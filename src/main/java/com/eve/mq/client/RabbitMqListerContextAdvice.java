@@ -12,7 +12,7 @@ import org.springframework.core.annotation.Order;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 /**
- * 拦截租户信息(多租户)
+ * 拦截基本context
  * <p>
  *
  * @author 谢洋
@@ -20,9 +20,9 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
  * @date 2019/10/15
  */
 @Order(HIGHEST_PRECEDENCE)
-public class RabbitMqListerTenantAdvice implements RabbitMqListerAdvice {
+public class RabbitMqListerContextAdvice implements RabbitMqListerAdvice {
 
-    protected final Logger logger = LoggerFactory.getLogger(RabbitMqListerTenantAdvice.class);
+    protected final Logger logger = LoggerFactory.getLogger(RabbitMqListerContextAdvice.class);
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -38,7 +38,9 @@ public class RabbitMqListerTenantAdvice implements RabbitMqListerAdvice {
         Message message = (Message) invocation.getArguments()[1];
         MessageProperties messageProperties = message.getMessageProperties();
         String tenantId = (String) messageProperties.getHeaders().get("tenant-id");
+        String uuid = (String) messageProperties.getHeaders().get("uuid");
         ServerContextHolder.setTenantId(tenantId);
+        ServerContextHolder.setData("uuid", uuid);
         if (logger.isDebugEnabled()) {
             String consumerQueue = messageProperties.getConsumerQueue();
             logger.debug("收到消息queue[{}] tenantId[{}]", consumerQueue, tenantId);
@@ -47,6 +49,7 @@ public class RabbitMqListerTenantAdvice implements RabbitMqListerAdvice {
 
     private void doAfter(MethodInvocation invocation) {
         ServerContextHolder.setTenantId(null);
+        ServerContextHolder.setData("uuid", null);
     }
 
 

@@ -9,8 +9,6 @@ import org.springframework.core.annotation.Order;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 /**
- * 拦截租户信息(多租户)
- * <p>
  *
  * @author 谢洋
  * @version 1.0.0

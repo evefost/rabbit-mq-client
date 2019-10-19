@@ -10,6 +10,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -34,6 +35,9 @@ public class TenantFilter implements Filter, ApplicationContextAware {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String tenantId = tenantMappingAdapter.getTenantId(servletRequest);
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        String uuid = request.getHeader("uuid");
+        ServerContextHolder.setData("uuid", uuid);
         ServerContextHolder.setTenantId(tenantId);
         try {
             filterChain.doFilter(servletRequest, servletResponse);

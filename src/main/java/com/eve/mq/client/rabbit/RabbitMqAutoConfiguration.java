@@ -1,6 +1,6 @@
 package com.eve.mq.client.rabbit;
 
-import com.eve.mq.client.RabbitMqListerTenantAdvice;
+import com.eve.mq.client.RabbitMqListerContextAdvice;
 import com.eve.mq.client.RabbitMqRetryAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -34,8 +34,8 @@ public class RabbitMqAutoConfiguration {
     }
 
     @Bean
-    RabbitMqListerTenantAdvice rabbitMqListerTenantAdvice() {
-        return new RabbitMqListerTenantAdvice();
+    RabbitMqListerContextAdvice rabbitMqListerTenantAdvice() {
+        return new RabbitMqListerContextAdvice();
     }
 
     @Bean

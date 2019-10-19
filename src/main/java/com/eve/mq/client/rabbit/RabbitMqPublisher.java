@@ -58,6 +58,10 @@ class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
         if (!StringUtils.isEmpty(tenantId)) {
             messageProperties.setHeader("tenant-id", tenantId);
         }
+        String uuid = (String) ServerContextHolder.getData("uuid");
+        if (!StringUtils.isEmpty(uuid)) {
+            messageProperties.setHeader("uuid", uuid);
+        }
         Message message = messageConverter.toMessage(sourceMsg.getData(), messageProperties);
         template.convertAndSend(exchange, routeKey, message);
     }

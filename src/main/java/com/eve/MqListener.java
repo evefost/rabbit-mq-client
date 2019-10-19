@@ -22,7 +22,7 @@ public class MqListener {
     @RabbitHandler
     public void listenerShoppeMq(User2 message) {
 
-        System.out.println("业务端处理tenantId:" + JSON.toJSONString(message) + ServerContextHolder.getTenantId());
+        System.out.println("业务端处理tenantId:" + JSON.toJSONString(message) + ServerContextHolder.getTenantId() + " UUID:" + ServerContextHolder.getData("uuid"));
     }
 
     //    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")
