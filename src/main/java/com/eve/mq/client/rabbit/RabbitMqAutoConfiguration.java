@@ -1,6 +1,7 @@
 package com.eve.mq.client.rabbit;
 
 import com.eve.mq.client.RabbitMqListerTenantAdvice;
+import com.eve.mq.client.RabbitMqRetryAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -9,15 +10,17 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * Created by xieyang on 19/10/17.
+ *
+ * @author xieyang
+ * @date 19/10/17
  */
 @Configuration
-public class RabbitMqAutoconfiguration {
+public class RabbitMqAutoConfiguration {
 
 
     @Bean
-    RabbitMqContainerInitializePostProcessor rabbitMqContainerInitializePostProcessor(@Autowired(required = false) List<RabbitMqListerAdvice> advice) {
-        return new RabbitMqContainerInitializePostProcessor(advice);
+    RabbitMqContainerInitializePostProcessor rabbitMqContainerInitializePostProcessor(@Autowired(required = false) List<RabbitMqListerAdvice> advices) {
+        return new RabbitMqContainerInitializePostProcessor(advices);
     }
 
     @Bean
@@ -34,5 +37,11 @@ public class RabbitMqAutoconfiguration {
     RabbitMqListerTenantAdvice rabbitMqListerTenantAdvice() {
         return new RabbitMqListerTenantAdvice();
     }
+
+    @Bean
+    RabbitMqRetryAdvice rabbitMqRetryAdvice() {
+        return new RabbitMqRetryAdvice();
+    }
+
 
 }
