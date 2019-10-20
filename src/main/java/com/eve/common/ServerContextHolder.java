@@ -5,6 +5,8 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.eve.common.GlobalConstant.TOKEN;
+
 /**
  * 类说明
  * <p>
@@ -31,26 +33,26 @@ public class ServerContextHolder {
 
 
     public static String getToken() {
-        return (String) contextHolder.get().get("x_http_token");
+        return (String) contextHolder.get().get(TOKEN);
     }
 
     public static void setToken(String token) {
         if (StringUtils.isEmpty(token)) {
-            contextHolder.get().remove("x_http_token");
+            contextHolder.get().remove(TOKEN);
         } else {
-            contextHolder.get().put("x_http_token", token);
+            contextHolder.get().put(TOKEN, token);
         }
     }
 
     public static String getTenantId() {
-        return (String) contextHolder.get().get("tenant-id");
+        return (String) contextHolder.get().get(GlobalConstant.TENANT_ID);
     }
 
     public static void setTenantId(String tenantId) {
         if (StringUtils.isEmpty(tenantId)) {
-            contextHolder.get().remove("tenant-id");
+            contextHolder.get().remove(GlobalConstant.TENANT_ID);
         } else {
-            contextHolder.get().put("tenant-id", tenantId);
+            contextHolder.get().put(GlobalConstant.TENANT_ID, tenantId);
         }
     }
 

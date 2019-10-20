@@ -1,5 +1,6 @@
 package com.eve.mq.client.rabbit;
 
+import com.eve.common.GlobalConstant;
 import com.eve.common.ServerContextHolder;
 import com.eve.mq.client.MessagePublisher;
 import org.springframework.amqp.core.Message;
@@ -56,12 +57,17 @@ class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
         MessageProperties messageProperties = new MessageProperties();
         String tenantId = ServerContextHolder.getTenantId();
         if (!StringUtils.isEmpty(tenantId)) {
-            messageProperties.setHeader("tenant-id", tenantId);
+            messageProperties.setHeader(GlobalConstant.TENANT_ID, tenantId);
         }
-        String uuid = (String) ServerContextHolder.getData("uuid");
+        String uuid = (String) ServerContextHolder.getData(GlobalConstant.LOG_UUID);
         if (!StringUtils.isEmpty(uuid)) {
-            messageProperties.setHeader("uuid", uuid);
+            messageProperties.setHeader(GlobalConstant.LOG_UUID, uuid);
         }
+        String token = ServerContextHolder.getToken();
+        if (!StringUtils.isEmpty(token)) {
+            messageProperties.setHeader(GlobalConstant.TOKEN, token);
+        }
+
         Message message = messageConverter.toMessage(sourceMsg.getData(), messageProperties);
         template.convertAndSend(exchange, routeKey, message);
     }

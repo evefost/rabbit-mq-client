@@ -15,7 +15,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
  * @date 2019/10/15
  */
 
-@Order(HIGHEST_PRECEDENCE + 1)
+@Order(HIGHEST_PRECEDENCE)
 public class RabbitMqRetryAdvice implements RabbitMqListerAdvice {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqRetryAdvice.class);

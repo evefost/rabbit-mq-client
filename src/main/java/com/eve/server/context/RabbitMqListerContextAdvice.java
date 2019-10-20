@@ -1,5 +1,6 @@
-package com.eve.mq.client;
+package com.eve.server.context;
 
+import com.eve.common.GlobalConstant;
 import com.eve.common.ServerContextHolder;
 import com.eve.mq.client.rabbit.RabbitMqListerAdvice;
 import org.aopalliance.intercept.MethodInvocation;
@@ -8,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
@@ -19,7 +23,8 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
  * @version 1.0.0
  * @date 2019/10/15
  */
-@Order(HIGHEST_PRECEDENCE)
+@Order(HIGHEST_PRECEDENCE+1)
+@Component
 public class RabbitMqListerContextAdvice implements RabbitMqListerAdvice {
 
     protected final Logger logger = LoggerFactory.getLogger(RabbitMqListerContextAdvice.class);
@@ -37,10 +42,13 @@ public class RabbitMqListerContextAdvice implements RabbitMqListerAdvice {
     private void doBefore(MethodInvocation invocation) {
         Message message = (Message) invocation.getArguments()[1];
         MessageProperties messageProperties = message.getMessageProperties();
-        String tenantId = (String) messageProperties.getHeaders().get("tenant-id");
-        String uuid = (String) messageProperties.getHeaders().get("log-uuid");
+        Map<String, Object> headers = messageProperties.getHeaders();
+        String tenantId = (String) headers.get(GlobalConstant.TENANT_ID);
+        String uuid = (String) headers.get(GlobalConstant.LOG_UUID);
+        String token = (String) headers.get(GlobalConstant.TOKEN);
         ServerContextHolder.setTenantId(tenantId);
-        ServerContextHolder.setData("log-uuid", uuid);
+        ServerContextHolder.setData(GlobalConstant.LOG_UUID, uuid);
+        ServerContextHolder.setToken(token);
         if (logger.isDebugEnabled()) {
             String consumerQueue = messageProperties.getConsumerQueue();
             logger.debug("收到消息queue[{}] tenantId[{}]", consumerQueue, tenantId);
@@ -49,7 +57,8 @@ public class RabbitMqListerContextAdvice implements RabbitMqListerAdvice {
 
     private void doAfter(MethodInvocation invocation) {
         ServerContextHolder.setTenantId(null);
-        ServerContextHolder.setData("uuid", null);
+        ServerContextHolder.setData(GlobalConstant.LOG_UUID, null);
+        ServerContextHolder.setToken(null);
     }
 
 
