@@ -1,6 +1,7 @@
 package com.eve;
 
 import com.alibaba.fastjson.JSON;
+import com.eve.common.GlobalConstant;
 import com.eve.common.ServerContextHolder;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,8 +22,10 @@ public class MqListener {
     @RabbitListener(queues = "xie-queue", containerFactory = "container_1")
     @RabbitHandler
     public void listenerShoppeMq(User2 message) {
-
-        System.out.println("业务端处理tenantId:" + JSON.toJSONString(message) + ServerContextHolder.getTenantId() + " UUID:" + ServerContextHolder.getData("uuid"));
+        if (true) {
+            throw new RuntimeException("xxxxx");
+        }
+        System.out.println("业务端处理tenantId:" + JSON.toJSONString(message) + ServerContextHolder.getTenantId() + " UUID:" + ServerContextHolder.getData(GlobalConstant.LOG_UUID));
     }
 
     //    @RabbitListener(queues = "xie-queue2", containerFactory = "container_2")

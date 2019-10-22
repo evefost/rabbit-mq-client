@@ -6,7 +6,7 @@ import com.eve.mq.client.MessagePublisher;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.AbstractMessageConverter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
@@ -23,11 +23,12 @@ class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
 
     private ApplicationContext applicationContext;
 
-    private Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();
+    private AbstractMessageConverter messageConverter;
 
 
-    public RabbitMqPublisher(ApplicationContext applicationContext) {
+    public RabbitMqPublisher(ApplicationContext applicationContext, AbstractMessageConverter messageConverter) {
         this.applicationContext = applicationContext;
+        this.messageConverter = messageConverter;
     }
 
     @Override

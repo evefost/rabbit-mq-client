@@ -7,10 +7,10 @@ package com.eve.common;
  */
 public interface GlobalConstant {
 
-    String LOG_UUID="log_uuid";
+    String LOG_UUID = "log-uuid";
 
     String TENANT_ID="tenant-id";
 
-    String TOKEN="x_http_token";
+    String TOKEN = "x-http-token";
 
 }
