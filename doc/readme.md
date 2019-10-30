@@ -20,3 +20,10 @@
 	3.字节码式，接直修改来
 	都必须获取方法参数类型
 	
+	0.postProcessBeanDefinitionRegistry(BeanDefinitionRegistry无序)
+	1.postProcessBeanDefinitionRegistry(实现PriorityOrdered有序序)
+	2.postProcessBeanDefinitionRegistry(实现Ordered有序)
+	3.postProcessBeanDefinitionRegistry(注解@Order 有序)
+	4.postProcessBeanDefinitionRegistry(注解@Order 有序)
+	5.postProcessBeanFactory(实现BeanDefinitionRegistryPostProcessor,按上面排序执行)
+	

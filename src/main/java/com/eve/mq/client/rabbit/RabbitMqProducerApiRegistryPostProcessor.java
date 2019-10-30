@@ -40,6 +40,11 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
     protected ResourceLoader resourceLoader;
 
     @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE + 11;
+    }
+
+    @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
@@ -133,8 +138,5 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
         }
     }
 
-    @Override
-    public int getOrder() {
-        return HIGHEST_PRECEDENCE + 11;
-    }
+
 }

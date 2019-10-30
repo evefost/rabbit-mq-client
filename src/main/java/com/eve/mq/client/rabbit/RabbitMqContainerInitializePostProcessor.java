@@ -35,6 +35,11 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
     static Map<String, RabbitmqProperties> rabbitmqPropertiesMap = new ConcurrentHashMap<>();
     private List<RabbitMqListerAdvice> adviceChain;
 
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE + 10;
+    }
+
 
     public RabbitMqContainerInitializePostProcessor(List<RabbitMqListerAdvice> adviceChain) {
         this.adviceChain = adviceChain;
@@ -107,9 +112,5 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
     }
 
 
-    @Override
-    public int getOrder() {
-        return HIGHEST_PRECEDENCE + 10;
-    }
 
 }
