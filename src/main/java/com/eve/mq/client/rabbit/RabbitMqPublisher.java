@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * @date 2019/10/17
  */
 
-class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
+public class RabbitMqPublisher<T> implements MessagePublisher<RabbitMessage<T>> {
 
     private ApplicationContext applicationContext;
 

@@ -1,8 +1,9 @@
-package com.eve.mq.client.rabbit;
+package com.eve.mq.client;
 
-import com.eve.mq.client.RabbitMqRetryAdvice;
+import com.eve.mq.client.rabbit.*;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import java.util.List;
  * @date 19/10/17
  */
 @Configuration
+@ConditionalOnBean(RabbitmqProperties.class)
 public class RabbitMqAutoConfiguration {
 
 

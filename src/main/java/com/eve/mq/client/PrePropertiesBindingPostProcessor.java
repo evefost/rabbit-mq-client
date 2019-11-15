@@ -78,6 +78,7 @@ public class PrePropertiesBindingPostProcessor implements BeanDefinitionRegistry
             propertiesInfos = PropertiesUtils.scanProperties(beanFactory, Object.class, AsProperties.class);
         } catch (Exception e) {
             logger.error("pre binding properties error :", e);
+            return;
         }
         //注入属性值
         ConfigurationPropertiesBindingPostProcessor bindingPostProcessor = beanFactory.getBean(ConfigurationPropertiesBindingPostProcessor.class);

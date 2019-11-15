@@ -89,10 +89,10 @@ public class RabbitMqProducerApiRegistryPostProcessor implements ResourceLoaderA
         if (annotation == null) {
             return;
         }
-        logger.debug("即将创建的实例名:" + beanName);
+        logger.info("即将创建mq生产者的实例名:" + beanName);
         String containerFactory = annotation.containerFactory();
         if (rabbitmqPropertiesMap.get(containerFactory) == null) {
-            throw new RuntimeException(beanClassName + "[" + containerFactory + "]不存在");
+            throw new RuntimeException(beanClassName + "[" + containerFactory + "]不存在,请检查配置");
         }
         producerInfo.setTargetClass(targetClass);
         producerInfo.setContainerName(containerFactory);

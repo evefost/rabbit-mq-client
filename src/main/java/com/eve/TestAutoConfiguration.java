@@ -25,11 +25,11 @@ public class TestAutoConfiguration {
     RabbitmqProperties rabbitmqProperties() {
         return new RabbitmqProperties();
     }
-
-    @ConfigurationProperties(prefix = "rabbitmq2")
-    @AsRabbitmqProperties(containerFactory = "container_2")
-    RabbitmqProperties rabbitmqProperties2() {
-        return new RabbitmqProperties();
-    }
+//
+//    @ConfigurationProperties(prefix = "rabbitmq2")
+//    @AsRabbitmqProperties(containerFactory = "container_2")
+//    RabbitmqProperties rabbitmqProperties2() {
+//        return new RabbitmqProperties();
+//    }
 
 }

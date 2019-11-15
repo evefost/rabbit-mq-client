@@ -46,19 +46,19 @@ public class TestController {
         message.setRouteKey("xie-rout-key");
         message.setContainerFactory("container_2");
         message.setData(user);
-        messagePublisher.publish(message);
+//        messagePublisher.publish(message);
         return "success";
     }
 
-    @Autowired
-    private MqListener mqListener;
+//    @Autowired
+//    private MqListener mqListener;
 
     @GetMapping("/publish3")
     String publish3() {
         User user = new User();
         user.setAge(111);
         user.setName("xieayng");
-        mqListener.listenerShoppeMq2(user);
+//        mqListener.listenerShoppeMq2(user);
         return "success";
     }
 

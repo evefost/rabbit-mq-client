@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.springframework.amqp.rabbit.connection.CachingConnectionFactory.ConfirmType.SIMPLE;
+
 /**
  * 初始化rabbit mq containers
  * <p>
@@ -89,7 +91,7 @@ public class RabbitMqContainerInitializePostProcessor implements BeanDefinitionR
         connectionFactory.setUsername(properties.getUsername());
         connectionFactory.setPassword(properties.getPassword());
         connectionFactory.setVirtualHost(properties.getVirtualHost());
-        connectionFactory.setPublisherConfirms(true);
+        connectionFactory.setPublisherConfirmType(SIMPLE);
 
         SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
         Jackson2JsonMessageConverter messageConverter = new Jackson2JsonMessageConverter();

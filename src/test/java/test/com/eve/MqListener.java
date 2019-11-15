@@ -1,10 +1,13 @@
-package com.eve;
+package test.com.eve;
 
 import com.alibaba.fastjson.JSON;
+import com.eve.User;
+import com.eve.User2;
 import com.eve.common.GlobalConstant;
 import com.eve.common.ServerContextHolder;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
 
 /**
  * 类说明
@@ -14,7 +17,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
  * @version 1.0.0
  * @date 2019/10/13
  */
-//@Component
+@Component
 public class MqListener {
 
     //
